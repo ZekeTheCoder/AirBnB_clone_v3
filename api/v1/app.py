@@ -11,8 +11,7 @@ from flask_cors import CORS
 from flasgger import Swagger
 from flasgger.utils import swag_from
 
-""" variables to keep code short """
-
+#  variables to keep code short
 err404_msg = {"error": "Not found"}
 
 app = Flask(__name__)
