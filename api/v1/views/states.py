@@ -16,7 +16,7 @@ def get_states():
 
     for state in all_states:
         list_states.append(state.to_dict())
-    return jsonify(list_states)
+    return (jsonify(list_states))
 
 
 @app_views.route('/states/<state_id>', methods=['GET'], strict_slashes=False)
@@ -25,8 +25,8 @@ def get_state(state_id):
     state = storage.get(State, state_id)
 
     if not state:
-        abort(404)
-    return jsonify(state.to_dict())
+        abort(404, description="state_id is not linked to any State object")
+    return (jsonify(state.to_dict()))
 
 
 @app_views.route('/states/<state_id>', methods=['DELETE'],
@@ -36,16 +36,11 @@ def delete_state(state_id):
     state = storage.get(State, state_id)
 
     if not state:
-        abort(404)
+        abort(404, description="state_id is not linked to any State object")
     state.delete()
-#    storage.save()
-    try:
-        storage.save()
-    except Exception as e:
-        # Handle any exceptions that may occur during saving
-        abort(500, description="An error occurred while deleting the state")
+    storage.save()
 
-    return make_response(jsonify({}), 200)
+    return (make_response(jsonify({}), 200))
 
 
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
@@ -53,15 +48,15 @@ def post_state():
     """ Creates a State """
     data = request.get_json()
     if not data:
-        abort(400, "Not a JSON")
+        abort(400, description="Not a JSON")
 
     if 'name' not in data:
-        abort(400, "Missing name")
+        abort(400, description="Missing name")
 
     instance = State(**data)
     storage.new(instance)
     storage.save()
-    return make_response(jsonify(instance.to_dict()), 201)
+    return (make_response(jsonify(instance.to_dict()), 201))
 
 
 @app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
@@ -70,7 +65,7 @@ def put_state(state_id):
     state = storage.get(State, state_id)
 
     if not state:
-        abort(404)
+        abort(404, description="state_id is not linked to any State object")
 
     if not request.get_json():
         abort(400, "Not a JSON")
@@ -84,4 +79,4 @@ def put_state(state_id):
             setattr(state, key, value)
     storage.save()
 
-    return make_response(jsonify(state.to_dict()), 200)
+    return (make_response(jsonify(state.to_dict()), 200))
