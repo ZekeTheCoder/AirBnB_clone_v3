@@ -113,3 +113,71 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+    #   the get and count methods  tests
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_get_existing_object(self):
+        """Test get method for an existing object"""
+        # Create a FileStorage instance
+        storage = FileStorage()
+
+        # Add some objects to storage
+        obj1 = State(id='1')
+        obj2 = State(id='2')
+        obj3 = Amenity(id='3')
+        storage._FileStorage__objects = {
+            'State.1': obj1,
+            'State.2': obj2,
+            'Amenity.3': obj3
+        }
+
+        # Test get method for an existing object
+        retrieved_obj = storage.get(State, '1')
+        self.assertEqual(retrieved_obj, obj1)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_get_non_existing_object(self):
+        """Test get method for a non-existing object"""
+        # Create a FileStorage instance
+        storage = FileStorage()
+
+        # Add some objects to storage
+        obj1 = State(id='1')
+        obj2 = State(id='2')
+        obj3 = Amenity(id='3')
+        storage._FileStorage__objects = {
+            'State.1': obj1,
+            'State.2': obj2,
+            'Amenity.3': obj3
+        }
+
+        # Test get method for a non-existing object
+        non_existing_obj = storage.get(State, '4')
+        self.assertIsNone(non_existing_obj)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_count(self):
+        """Test count method"""
+        # Create a FileStorage instance
+        storage = FileStorage()
+
+        # Add some objects to storage
+        obj1 = State(id='1')
+        obj2 = State(id='2')
+        obj3 = Amenity(id='3')
+        storage._FileStorage__objects = {
+            'State.1': obj1,
+            'State.2': obj2,
+            'Amenity.3': obj3
+        }
+
+        # Test count method for all objects
+        total_count = storage.count()
+        self.assertEqual(total_count, 3)
+
+        # Test count method for specific class
+        state_count = storage.count(State)
+        self.assertEqual(state_count, 2)
+
+        amenity_count = storage.count(Amenity)
+        self.assertEqual(amenity_count, 1)
