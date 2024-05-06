@@ -38,7 +38,13 @@ def delete_state(state_id):
     if not state:
         abort(404)
     state.delete()
-    storage.save()
+#    storage.save()
+    try:
+        storage.save()
+    except Exception as e:
+        # Handle any exceptions that may occur during saving
+        abort(500, description="An error occurred while deleting the state")
+
     return make_response(jsonify({}), 200)
 
 
