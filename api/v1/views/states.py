@@ -26,7 +26,6 @@ def get_state(state_id):
 
     if not state:
         abort(404)
-
     return jsonify(state.to_dict())
 
 
@@ -38,11 +37,9 @@ def delete_state(state_id):
 
     if not state:
         abort(404)
-
-    storage.delete(state)
+    state.delete()
     storage.save()
-
-    return make_response(jsonify({}), 200)
+    return jsonify({})
 
 
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
@@ -56,8 +53,8 @@ def post_state():
 
     data = request.get_json()
     instance = State(**data)
-    instance.save()
-
+    storage.new(instance)
+    storage.save()
     return make_response(jsonify(instance.to_dict()), 201)
 
 
