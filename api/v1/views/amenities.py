@@ -24,7 +24,6 @@ def get_amenity(amenity_id):
     amenity = storage.get(Amenity, amenity_id)
     if not amenity:
         abort(404, description="amenity_id is not linked to Amenity object")
-
     return (jsonify(amenity.to_dict()))
 
 
@@ -40,7 +39,6 @@ def delete_amenity(amenity_id):
 
     amenity.delete()
     storage.save()
-
     return (make_response(jsonify({}), 200))
 
 
@@ -67,13 +65,12 @@ def put_amenity(amenity_id):
     if not request.get_json():
         abort(400, description="Not a JSON")
 
-    ignore = ['id', 'created_at', 'updated_at']
-
     amenity = storage.get(Amenity, amenity_id)
 
     if not amenity:
         abort(404, description="amenity_id is not linked to Amenity object")
 
+    ignore = ['id', 'created_at', 'updated_at']
     data = request.get_json()
     for key, value in data.items():
         if key not in ignore:
