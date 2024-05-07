@@ -6,61 +6,57 @@ from models.user import User
 from models import storage
 from api.v1.views import app_views
 from flask import abort, jsonify, make_response, request
-from flasgger.utils import swag_from
 
 
 @app_views.route('/places/<place_id>/reviews', methods=['GET'],
                  strict_slashes=False)
-@swag_from('documentation/reviews/get_reviews.yml', methods=['GET'])
 def get_reviews(place_id):
-    """ Retrieve review objs of a place """
+    """ storage.new(instance)
+    storage.save() """
     place = storage.get(Place, place_id)
 
     if not place:
-        abort(404)
+        abort(404, description="place_id is not linked to any Place object")
 
     reviews = [review.to_dict() for review in place.reviews]
 
-    return jsonify(reviews)
+    return (jsonify(reviews))
 
 
 @app_views.route('/reviews/<review_id>', methods=['GET'], strict_slashes=False)
-@swag_from('documentation/reviews/get_review.yml', methods=['GET'])
 def get_review(review_id):
-    """ retrieve a review object """
+    """ Retrieves a Review object. """
     review = storage.get(Review, review_id)
     if not review:
-        abort(404)
+        abort(404, description="review_id is not linked to any Review object")
 
-    return jsonify(review.to_dict())
+    return (jsonify(review.to_dict()))
 
 
 @app_views.route('/reviews/<review_id>', methods=['DELETE'],
                  strict_slashes=False)
-@swag_from('documentation/reviews/delete_reviews.yml', methods=['DELETE'])
 def delete_review(review_id):
-    """ rm review Obj """
+    """ Deletes a Review object """
 
     review = storage.get(Review, review_id)
 
     if not review:
-        abort(404)
+        abort(404, description="review_id is not linked to any Review object")
 
-    storage.delete(review)
+    review.delete()
     storage.save()
 
-    return make_response(jsonify({}), 200)
+    return (make_response(jsonify({}), 200))
 
 
 @app_views.route('/places/<place_id>/reviews', methods=['POST'],
                  strict_slashes=False)
-@swag_from('documentation/reviews/post_reviews.yml', methods=['POST'])
 def post_review(place_id):
-    """ creates a review """
+    """ creates a review object """
     place = storage.get(Place, place_id)
 
     if not place:
-        abort(404)
+        abort(404, description="place_id is not linked to any Place object")
 
     if not request.get_json():
         abort(400, description="Not a JSON")
@@ -79,18 +75,18 @@ def post_review(place_id):
 
     data['place_id'] = place_id
     instance = Review(**data)
-    instance.save()
-    return make_response(jsonify(instance.to_dict()), 201)
+    storage.new(instance)
+    storage.save()
+    return (make_response(jsonify(instance.to_dict()), 201))
 
 
 @app_views.route('/reviews/<review_id>', methods=['PUT'], strict_slashes=False)
-@swag_from('documentation/reviews/put_reviews.yml', methods=['PUT'])
 def put_review(review_id):
-    """ Update review """
+    """ Updates a Review object """
     review = storage.get(Review, review_id)
 
     if not review:
-        abort(404)
+        abort(404, description="review_id is not linked to any Review object")
 
     if not request.get_json():
         abort(400, description="Not a JSON")
@@ -102,4 +98,4 @@ def put_review(review_id):
         if key not in ignore:
             setattr(review, key, value)
     storage.save()
-    return make_response(jsonify(review.to_dict()), 200)
+    return (make_response(jsonify(review.to_dict()), 200))
