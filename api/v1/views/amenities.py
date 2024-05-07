@@ -5,53 +5,48 @@ from models.amenity import Amenity
 from models import storage
 from api.v1.views import app_views
 from flask import abort, jsonify, make_response, request
-from flasgger.utils import swag_from
 
 
 @app_views.route('/amenities', methods=['GET'], strict_slashes=False)
-@swag_from('documentation/amenity/all_amenities.yml')
 def get_amenities():
     """    Retrieve all amenities    """
     all_amenities = storage.all(Amenity).values()
     list_amenities = []
     for amenity in all_amenities:
         list_amenities.append(amenity.to_dict())
-    return jsonify(list_amenities)
+    return (jsonify(list_amenities))
 
 
 @app_views.route('/amenities/<amenity_id>/', methods=['GET'],
                  strict_slashes=False)
-@swag_from('documentation/amenity/get_amenity.yml', methods=['GET'])
 def get_amenity(amenity_id):
     """ Retrieve specific amenity """
     amenity = storage.get(Amenity, amenity_id)
     if not amenity:
-        abort(404)
+        abort(404, description="amenity_id is not linked to Amenity object")
 
-    return jsonify(amenity.to_dict())
+    return (jsonify(amenity.to_dict()))
 
 
 @app_views.route('/amenities/<amenity_id>', methods=['DELETE'],
                  strict_slashes=False)
-@swag_from('documentation/amenity/delete_amenity.yml', methods=['DELETE'])
 def delete_amenity(amenity_id):
-    """ rm amenity obj """
+    """ delete amenity object """
 
     amenity = storage.get(Amenity, amenity_id)
 
     if not amenity:
-        abort(404)
+        abort(404, description="amenity_id is not linked to Amenity object")
 
-    storage.delete(amenity)
+    amenity.delete()
     storage.save()
 
-    return make_response(jsonify({}), 200)
+    return (make_response(jsonify({}), 200))
 
 
 @app_views.route('/amenities', methods=['POST'], strict_slashes=False)
-@swag_from('documentation/amenity/post_amenity.yml', methods=['POST'])
 def post_amenity():
-    """ mk amenity """
+    """ create amenity object"""
     if not request.get_json():
         abort(400, description="Not a JSON")
 
@@ -60,15 +55,15 @@ def post_amenity():
 
     data = request.get_json()
     instance = Amenity(**data)
-    instance.save()
-    return make_response(jsonify(instance.to_dict()), 201)
+    storage.new(instance)
+    storage.save()
+    return (make_response(jsonify(instance.to_dict()), 201))
 
 
 @app_views.route('/amenities/<amenity_id>', methods=['PUT'],
                  strict_slashes=False)
-@swag_from('documentation/amenity/put_amenity.yml', methods=['PUT'])
 def put_amenity(amenity_id):
-    """    Update amenity    """
+    """    Update amenity  object  """
     if not request.get_json():
         abort(400, description="Not a JSON")
 
@@ -77,11 +72,11 @@ def put_amenity(amenity_id):
     amenity = storage.get(Amenity, amenity_id)
 
     if not amenity:
-        abort(404)
+        abort(404, description="amenity_id is not linked to Amenity object")
 
     data = request.get_json()
     for key, value in data.items():
         if key not in ignore:
             setattr(amenity, key, value)
     storage.save()
-    return make_response(jsonify(amenity.to_dict()), 200)
+    return (make_response(jsonify(amenity.to_dict()), 200))
